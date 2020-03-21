@@ -10,13 +10,10 @@ server_socket.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)   #ALLOWS TO R
 
 server_socket.bind((IP,PORT))
 server_socket.listen()
-
 sockets_list=[server_socket]
 
 clients={}
-
-
-
+print(f'Listening for connections on {IP}:{PORT}...')
 
 def receive_msg(client_socket):
     try:
@@ -24,15 +21,14 @@ def receive_msg(client_socket):
         
         if not len(message_header):
             return False
-        message_length=int(message_header.decode("utf-8"))
-        return {"header":message_header,"data":client_socket.recv(message_length)}
+        message_length=int(message_header.decode('utf-8').strip())
+        return {'header': message_header, 'data': client_socket.recv(message_length)}
         
     except:
         return False
 
-
 while True:
-    read_sockets,_,exception_sockets=select.select(sockets_list,[],sockets_list)    #Here first parameeter is the list from which we will read the socket and second in which we will broadcast the message; third is for error
+    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)    #Here first parameeter is the list from which we will read the socket and second in which we will broadcast the message; third is for error
     
     for notified_socket in read_sockets:
         if notified_socket==server_socket:
@@ -58,7 +54,7 @@ while True:
             
             for client_socket in clients:
                 if client_socket!=notified_socket:
-                    client_socket.send(user['header']+user['data']+message['header']+message['data'])
+                    client_socket.send(user['header'] + user['data'] + message['header'] + message['data'])
     
     for notified_socket in exception_sockets:
         sockets_list.remove(notified_socket)
